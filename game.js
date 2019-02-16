@@ -71,18 +71,17 @@ class Vector {
     isIntersect(newActor) {
       if (newActor === undefined) {
         throw new Error('Метод <isIntersect> не может быть вызван без аргумента');
-      } elseif (!(newActor instanceof Actor)) {
+      } 
+      if (!(newActor instanceof Actor)) {
         throw new Error('В качестве аргумента может быть только объект типа Actor');
       };
   
       //------- работыю над этой частью начало
-      if (this.left === newActor.right || this.right === newActor.left + 1 || this.top === newActor.bottom - 1 || this.bottom === newActor.top + 1) {
+      if ((this.left <= newActor.right && this.left >= newActor.left) || (this.right >= newActor.left && this.right <= newActor.right) || (this.top >= newActor.top && this.top <= newActor.bottom) || (this.bottom >= newActor.top && this.bottom <= newActor.bottom)) {
         return true
       }
   
-      if !(this.left === newActor.left || this.right === newActor.right || this.top === newActor.top || this.bottom === newActor.bottom) {
-        return true;
-      }
+      
       return false;
       //-----------работыю над этой частью конец 
   
