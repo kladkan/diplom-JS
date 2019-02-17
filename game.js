@@ -24,15 +24,6 @@ class Vector {
     }
   }
   
-  /*
-  //Пример кода
-  const start = new Vector(30, 50);
-  const moveTo = new Vector(5, 10);
-  const finish = start.plus(moveTo.times(2));
-  
-  console.log(`Исходное расположение: ${start.x}:${start.y}`);
-  console.log(`Текущее расположение: ${finish.x}:${finish.y}`);
-  */
   //----------------------------
   class Actor {
     constructor(pos = new Vector(0, 0), size = new Vector(1, 1), speed = new Vector(0, 0)) {
@@ -45,25 +36,19 @@ class Vector {
     }
   
     act() {
-      
     }
-  
     get left() {
       return this.pos.x;
-    }
-  
+    }  
     get top() {
       return this.pos.y;
     }
-  
     get right() {
       return this.pos.x + this.size.x;
     }
-  
     get bottom() {
       return this.pos.y + this.size.y;
     }
-  
     get type() {
       return 'actor';
     }
@@ -75,75 +60,96 @@ class Vector {
       if (!(newActor instanceof Actor)) {
         throw new Error('В качестве аргумента может быть только объект типа Actor');
       };
-  
-      //------- работыю над этой частью начало
-      if ((this.left <= newActor.right && this.left >= newActor.left) || (this.right >= newActor.left && this.right <= newActor.right) || (this.top >= newActor.top && this.top <= newActor.bottom) || (this.bottom >= newActor.top && this.bottom <= newActor.bottom)) {
-        return true
+
+      if (newActor.bottom <= this.top || newActor.left >= this.right || newActor.top >= this.bottom || newActor.right <= this.left) {
+        return false
       }
-  
-      
-      return false;
-      //-----------работыю над этой частью конец 
-  
-    }
-  
-  }
-  /*
-  Метод isIntersect
-  Метод проверяет, пересекается ли текущий объект с переданным объектом, и если да, возвращает true, иначе – false.
-  
-  Принимает один аргумент — движущийся объект типа Actor. Если передать аргумент другого типа или вызвать без аргументов, то метод бросает исключение.
-  
-  Если передать в качестве аргумента этот же объект, то всегда возвращает false. Объект не пересекается сам с собой.
-  
-  Объекты, имеющие смежные границы, не пересекаются.
-  */
-  //Пример кода
-  const items = new Map();
-  const player = new Actor();
-  items.set('Игрок', player);
-  items.set('Первая монета', new Actor(new Vector(10, 10)));
-  items.set('Вторая монета', new Actor(new Vector(15, 5)));
-  
-  function position(item) {
-    return ['left', 'top', 'right', 'bottom']
-      .map(side => `${side}: ${item[side]}`)
-      .join(', ');  
-  }
-  
-  function movePlayer(x, y) {
-    player.pos = player.pos.plus(new Vector(x, y));
-  }
-  
-  function status(item, title) {
-    console.log(`${title}: ${position(item)}`);
-    if (player.isIntersect(item)) {
-      console.log(`Игрок подобрал ${title}`);
+
+      if (this === newActor) {
+        return false
+      } 
+      return true;
     }
   }
-  
-  items.forEach(status);
-  movePlayer(10, 10);
-  items.forEach(status);
-  movePlayer(5, -5);
-  items.forEach(status);
-  /*
-  Результат работы примера:
-  Игрок: left: 0, top: 0, right: 1, bottom: 1
-  Первая монета: left: 10, top: 10, right: 11, bottom: 11
-  Вторая монета: left: 15, top: 5, right: 16, bottom: 6
-  Игрок: left: 10, top: 10, right: 11, bottom: 11
-  Первая монета: left: 10, top: 10, right: 11, bottom: 11
-  Игрок подобрал Первая монета
-  Вторая монета: left: 15, top: 5, right: 16, bottom: 6
-  Игрок: left: 15, top: 5, right: 16, bottom: 6
-  Первая монета: left: 10, top: 10, right: 11, bottom: 11
-  Вторая монета: left: 15, top: 5, right: 16, bottom: 6
-  Игрок подобрал Вторая монета
-  */
+
   //---------------------------------
   class Level {
-  
+    constructor(grid, actors) {
+      this.grid = grid;
+      this.actors = actors;
+      this.player = actors.find(player => player.type === 'player');
+      this.height = grid.length;
+      this.width = Math.max(...grid.map(el => el.length));
+      this.status = null;
+      this.finishDelay = 1;
+    }
+
+    isFinished() {
+      if (this.status !== null && this.finishDelay < 0) {
+        return true;
+      }
+    }
+
+    actorAt(actor) {
+      if (actor === undefined) {
+        throw new Error('Метод <actorAt> не может быть вызван без аргумента');
+      } 
+      if (!(actor instanceof Actor)) {
+        throw new Error('В качестве аргумента может быть только объект типа Actor');
+      }
+      if (actor.pos === this.pos) {
+        return actor;
+      }
+      
+
+    }
+
+
   }
-  
-  
+/*
+Метод actorAt
+Определяет, расположен ли какой-то другой движущийся объект в переданной позиции, и если да, вернёт этот объект.
+
+Принимает один аргумент — движущийся объект, Actor. Если не передать аргумент или передать не объект Actor, метод должен бросить исключение.
+
+Возвращает undefined, если переданный движущийся объект не пересекается ни с одним объектом на игровом поле.
+
+Возвращает объект Actor, если переданный объект пересекается с ним на игровом поле. Если пересекается с несколькими объектами, вернет первый.
+*/
+//Пример кода
+const grid = [
+  [undefined, undefined],
+  ['wall', 'wall']
+];
+
+function MyCoin(title) {
+  this.type = 'coin';
+  this.title = title;
+}
+MyCoin.prototype = Object.create(Actor);
+MyCoin.constructor = MyCoin;
+
+const goldCoin = new MyCoin('Золото');
+const bronzeCoin = new MyCoin('Бронза');
+const player = new Actor();
+const fireball = new Actor();
+
+const level = new Level(grid, [ goldCoin, bronzeCoin, player, fireball ]);
+
+level.playerTouched('coin', goldCoin);
+level.playerTouched('coin', bronzeCoin);
+
+if (level.noMoreActors('coin')) {
+  console.log('Все монеты собраны');
+  console.log(`Статус игры: ${level.status}`);
+}
+
+const obstacle = level.obstacleAt(new Vector(1, 1), player.size);
+if (obstacle) {
+  console.log(`На пути препятствие: ${obstacle}`);
+}
+
+const otherActor = level.actorAt(player);
+if (otherActor === fireball) {
+  console.log('Пользователь столкнулся с шаровой молнией');
+}
