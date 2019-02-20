@@ -76,7 +76,7 @@ class Level {
   constructor(grid = [], actors = []) {
     this.grid = grid;
     this.actors = actors;
-    this.player = actors.find(player => player === player);
+    this.player = actors.find(player => player === player);// надо получить свойство player и добавить туда свойство type.
     this.height = grid.length;
     if (Math.max(...grid.map(el => el.length)) === -Infinity) {
       this.width = 0;
