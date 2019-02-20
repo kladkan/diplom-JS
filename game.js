@@ -76,7 +76,7 @@ class Level {
   constructor(grid = [], actors = []) {
     this.grid = grid;
     this.actors = actors;
-    this.player = actors.find(player => player === player);// надо получить объект player и добавить туда свойство type.
+    this.player = actors.find(player => player.type === 'player');// надо получить объект player и добавить туда свойство type.
     this.height = grid.length;
     if (Math.max(...grid.map(el => el.length)) === -Infinity) {
       this.width = 0;
@@ -101,12 +101,15 @@ class Level {
     if (!(newActor instanceof Actor)) {
       throw new Error('В качестве аргумента может быть только объект класса Actor');
     }
+
     for (let actor of this.actors) {
       if (actor.pos === newActor) {
         return actor;
       }
     }
+
     return this.actors.find(actor => actor.isIntersect(newActor));
+
   }
 
   obstacleAt(newPos, objSize) {
@@ -126,18 +129,21 @@ class Level {
       if (newPos.y < 0) {
         return 'wall';
       }
-
+      
       if (this.grid[newPos.y][objSize.x + newPos.x] === undefined) {
         return undefined;
       } else {
         return this.grid[newPos.y][objSize.x + newPos.x];
       }
+
       
       if (this.grid[newPos.y][newPos.x] === undefined) {
         return undefined;
       } else {
         return this.grid[newPos.y][newPos.x];
       }
+
+
       
       if (this.grid[objSize.y + newPos.y][newPos.x] === undefined) {
         return undefined;
@@ -181,7 +187,7 @@ class Level {
   
 }
 
-//Пример кода для проверки класса Level
+//Пример кода
 const grid = [
   [undefined, undefined],
   ['wall', 'wall']
@@ -198,9 +204,9 @@ const goldCoin = new MyCoin('Золото');
 const bronzeCoin = new MyCoin('Бронза');
 const player = new Actor();
 const fireball = new Actor();
-//console.log(player);
+//console.log(player.pos);
 const level = new Level(grid, [ goldCoin, bronzeCoin, player, fireball ]);
-//console.log(level.player);
+//console.log(level.width);
 level.playerTouched('coin', goldCoin);
 level.playerTouched('coin', bronzeCoin);
 
