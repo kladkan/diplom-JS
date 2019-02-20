@@ -73,12 +73,16 @@ class Actor {
 
 //---------------------------------
 class Level {
-  constructor(grid, actors) {
+  constructor(grid = [], actors = []) {
     this.grid = grid;
     this.actors = actors;
     this.player = actors.find(player => player.type === 'player');
     this.height = grid.length;
-    this.width = Math.max(...grid.map(el => el.length));
+    if (Math.max(...grid.map(el => el.length)) === -Infinity) {
+      this.width = 0;
+    } else {
+      this.width = Math.max(...grid.map(el => el.length))
+    }
     this.status = null;
     this.finishDelay = 1;
   }
@@ -87,78 +91,73 @@ class Level {
     if (this.status !== null && this.finishDelay < 0) {
       return true;
     }
+    return false;
   }
 
   actorAt(newActor) {
     if (newActor === undefined) {
       throw new Error('Метод <actorAt> не может быть вызван без аргумента');
-    } 
+    }
     if (!(newActor instanceof Actor)) {
       throw new Error('В качестве аргумента может быть только объект класса Actor');
     }
 
     for (let actor of this.actors) {
-      if (actor.pos === newActor.pos) {
+      if (actor.pos === newActor) {
         return actor;
       }
     }
 
-    for (let actor of this.actors) {
-      if (newActor.bottom <= actor.top || newActor.left >= actor.right || newActor.top >= actor.bottom || newActor.right <= actor.left) {
-        return actor;
-      }
-      return undefined;
-    }  
+    return this.actors.find(actor => actor.isIntersect(newActor));
+
   }
 
   obstacleAt(newPos, objSize) {
     if (!(newPos instanceof Vector) || !(objSize instanceof Vector)) {
-      throw new Error('В качестве аргументов может быть только объект класса Actor');
+      throw new Error('В качестве аргументов может быть только объект класса Vector');
     };
 
-    if (newPos.x > 0) {
-      if (objSize.right + newPos.x > this.width) {
+      if (newPos.x + objSize.x > this.width) {
         return 'wall';
       }
-      if (this.grid[objSize.pos.y][objSize.right + newPos.x] === undefined) {
-        return undefined;
-      } else {
-        return this.grid[objSize.pos.y][objSize.right + newPos.x];
-      }
-    }
-
-    if (newPos.x < 0) {
-      if (objSize.left - newPos.x < 0) {
+      if (newPos.x < 0) {
         return 'wall';
       }
-      if (this.grid[objSize.pos.y][objSize.left - newPos.x] === undefined) {
-        return undefined;
-      } else {
-        return this.grid[objSize.pos.y][objSize.left - newPos.x];
-      }
-    }
-
-    if (newPos.y > 0) {
-      if (objSize.bottom + newPos.y > this.height) {
+      if (objSize.y + newPos.y > this.height) {
         return 'lava';
       }
-      if (this.grid[objSize.bottom + newPos.y][objSize.pos.x] === undefined) {
-        return undefined;
-      } else {
-        return this.grid[objSize.bottom + newPos.y][objSize.pos.x];
-      }
-    }
-
-    if (newPos.y < 0) {
-      if (objSize.top - newPos.y < 0) {
+      if (newPos.y < 0) {
         return 'wall';
       }
-      if (this.grid[objSize.top - newPos.y][objSize.pos.x] === undefined) {
+      
+      if (this.grid[newPos.y][objSize.x + newPos.x] === undefined) {
         return undefined;
       } else {
-        return this.grid[objSize.top - newPos.y][objSize.pos.x];
+        return this.grid[newPos.y][objSize.x + newPos.x];
       }
-    }
+
+      
+      if (this.grid[newPos.y][newPos.x] === undefined) {
+        return undefined;
+      } else {
+        return this.grid[newPos.y][newPos.x];
+      }
+
+
+      
+      if (this.grid[objSize.y + newPos.y][newPos.x] === undefined) {
+        return undefined;
+      } else {
+        return this.grid[objSize.y + newPos.y][newPos.x];
+      }
+
+      
+      if (this.grid[newPos.y][newPos.x] === undefined) {
+        return undefined;
+      } else {
+        return this.grid[newPos.y][newPos.x];
+      }
+
   }
 
   removeActor(delActor) {
@@ -172,24 +171,33 @@ class Level {
     return false;
   }
 
+  playerTouched(obstacleType, touchActor) {
+    if (obstacleType === 'lava' || obstacleType === 'fireball') {
+      return this.status = 'lost';
+    }
 
+    if (obstacleType === 'coin' && touchActor.type === 'coin' ) {
+      if (!this.noMoreActors(obstacleType)) {
+        this.removeActor(touchActor);
+      } else {
+        return this.status = 'won';
+      }
+    }
+  }
+  
 }
+
 /*
-const myArray = [
-{name: 'Bill', age: 15},
-{name: 'Max', age: 40},
-{name: 'Casey', age: 23},
-]
-const oldMan = myArray.find(function (man) {
-return man.age > 50;
-})
-console.log(oldMan); // => undefined
-Метод noMoreActors
-Определяет, остались ли еще объекты переданного типа на игровом поле.
+Метод playerTouched
+Один из ключевых методов, определяющий логику игры. Меняет состояние игрового поля при касании игроком каких-либо объектов или препятствий.
 
-Принимает один аргумент — тип движущегося объекта, строка.
+Если состояние игры уже отлично от null, то не делаем ничего, игра уже и так завершилась.
 
-Возвращает true, если на игровом поле нет объектов этого типа (свойство type). Иначе возвращает false.
+Принимает два аргумента. Тип препятствия или объекта, строка. Движущийся объект, которого коснулся игрок, — объект типа Actor, необязательный аргумент.
+
+Если первым аргументом передать строку lava или fireball, то меняем статус игры на lost (свойство status). Игрок проигрывает при касании лавы или шаровой молнии.
+
+Если первым аргументом передать строку coin, а вторым — объект монеты, то необходимо удалить эту монету с игрового поля. Если при этом на игровом поле не осталось больше монет, то меняем статус игры на won. Игрок побеждает, когда собирает все монеты на уровне. Отсюда вытекает факт, что уровень без монет пройти невозможно.
 */
 //Пример кода
 const grid = [
@@ -208,9 +216,9 @@ const goldCoin = new MyCoin('Золото');
 const bronzeCoin = new MyCoin('Бронза');
 const player = new Actor();
 const fireball = new Actor();
-
+console.log(player.pos);
 const level = new Level(grid, [ goldCoin, bronzeCoin, player, fireball ]);
-
+//console.log(level.width);
 level.playerTouched('coin', goldCoin);
 level.playerTouched('coin', bronzeCoin);
 
