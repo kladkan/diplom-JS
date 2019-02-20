@@ -76,7 +76,7 @@ class Level {
   constructor(grid = [], actors = []) {
     this.grid = grid;
     this.actors = actors;
-    this.player = actors.find(player => player.type === 'player');
+    this.player = actors.find(player => player === player);
     this.height = grid.length;
     if (Math.max(...grid.map(el => el.length)) === -Infinity) {
       this.width = 0;
@@ -101,15 +101,12 @@ class Level {
     if (!(newActor instanceof Actor)) {
       throw new Error('В качестве аргумента может быть только объект класса Actor');
     }
-
     for (let actor of this.actors) {
       if (actor.pos === newActor) {
         return actor;
       }
     }
-
     return this.actors.find(actor => actor.isIntersect(newActor));
-
   }
 
   obstacleAt(newPos, objSize) {
@@ -129,21 +126,18 @@ class Level {
       if (newPos.y < 0) {
         return 'wall';
       }
-      
+
       if (this.grid[newPos.y][objSize.x + newPos.x] === undefined) {
         return undefined;
       } else {
         return this.grid[newPos.y][objSize.x + newPos.x];
       }
-
       
       if (this.grid[newPos.y][newPos.x] === undefined) {
         return undefined;
       } else {
         return this.grid[newPos.y][newPos.x];
       }
-
-
       
       if (this.grid[objSize.y + newPos.y][newPos.x] === undefined) {
         return undefined;
@@ -187,19 +181,7 @@ class Level {
   
 }
 
-/*
-Метод playerTouched
-Один из ключевых методов, определяющий логику игры. Меняет состояние игрового поля при касании игроком каких-либо объектов или препятствий.
-
-Если состояние игры уже отлично от null, то не делаем ничего, игра уже и так завершилась.
-
-Принимает два аргумента. Тип препятствия или объекта, строка. Движущийся объект, которого коснулся игрок, — объект типа Actor, необязательный аргумент.
-
-Если первым аргументом передать строку lava или fireball, то меняем статус игры на lost (свойство status). Игрок проигрывает при касании лавы или шаровой молнии.
-
-Если первым аргументом передать строку coin, а вторым — объект монеты, то необходимо удалить эту монету с игрового поля. Если при этом на игровом поле не осталось больше монет, то меняем статус игры на won. Игрок побеждает, когда собирает все монеты на уровне. Отсюда вытекает факт, что уровень без монет пройти невозможно.
-*/
-//Пример кода
+//Пример кода для проверки класса Level
 const grid = [
   [undefined, undefined],
   ['wall', 'wall']
@@ -216,9 +198,9 @@ const goldCoin = new MyCoin('Золото');
 const bronzeCoin = new MyCoin('Бронза');
 const player = new Actor();
 const fireball = new Actor();
-console.log(player.pos);
+//console.log(player);
 const level = new Level(grid, [ goldCoin, bronzeCoin, player, fireball ]);
-//console.log(level.width);
+//console.log(level.player);
 level.playerTouched('coin', goldCoin);
 level.playerTouched('coin', bronzeCoin);
 
