@@ -116,48 +116,25 @@ class Level {
     if (!(newPos instanceof Vector) || !(objSize instanceof Vector)) {
       throw new Error('В качестве аргументов может быть только объект класса Vector');
     };
+    const leftWall = Math.floor(newPos.x);
+    const rightWall = Math.ceil(newPos.x + objSize.x);
+    const topWall = Math.floor(newPos.y);
+    const lava = Math.ceil(newPos.y + objSize.y);
 
-      if (newPos.x + objSize.x > this.width) {
-        return 'wall';
-      }
-      if (newPos.x < 0) {
-        return 'wall';
-      }
-      if (objSize.y + newPos.y > this.height) {
-        return 'lava';
-      }
-      if (newPos.y < 0) {
-        return 'wall';
-      }
-      
-      if (this.grid[newPos.y][objSize.x + newPos.x] === undefined) {
-        return undefined;
-      } else {
-        return this.grid[newPos.y][objSize.x + newPos.x];
-      }
+    if (leftWall < 0 || rightWall > this.width || topWall < 0) {
+      return 'wall';
+    }
+    if (lava > this.height) {
+      return 'lava';
+    }
 
-      
-      if (this.grid[newPos.y][newPos.x] === undefined) {
-        return undefined;
-      } else {
-        return this.grid[newPos.y][newPos.x];
+    for (let x = leftWall; x < rightWall; x++) {
+      for (let y = topWall; y < lava; y++) {
+        if (this.grid[y][x] === 'wall' || this.grid[y][x] === 'lava') {
+          return this.grid[y][x];
+        }
       }
-
-
-      
-      if (this.grid[objSize.y + newPos.y][newPos.x] === undefined) {
-        return undefined;
-      } else {
-        return this.grid[objSize.y + newPos.y][newPos.x];
-      }
-
-      
-      if (this.grid[newPos.y][newPos.x] === undefined) {
-        return undefined;
-      } else {
-        return this.grid[newPos.y][newPos.x];
-      }
-
+    }
   }
 
   removeActor(delActor) {
@@ -177,50 +154,9 @@ class Level {
     }
 
     if (obstacleType === 'coin' && touchActor.type === 'coin' ) {
-      if (!this.noMoreActors(obstacleType)) {
-        this.removeActor(touchActor);
-      } else {
-        return this.status = 'won';
-      }
+      this.removeActor(touchActor);
+      return this.status = 'won';
     }
   }
-  
 }
 
-//Пример кода
-const grid = [
-  [undefined, undefined],
-  ['wall', 'wall']
-];
-
-function MyCoin(title) {
-  this.type = 'coin';
-  this.title = title;
-}
-MyCoin.prototype = Object.create(Actor);
-MyCoin.constructor = MyCoin;
-
-const goldCoin = new MyCoin('Золото');
-const bronzeCoin = new MyCoin('Бронза');
-const player = new Actor();
-const fireball = new Actor();
-//console.log(player.pos);
-const level = new Level(grid, [ goldCoin, bronzeCoin, player, fireball ]);
-//console.log(level.width);
-level.playerTouched('coin', goldCoin);
-level.playerTouched('coin', bronzeCoin);
-
-if (level.noMoreActors('coin')) {
-  console.log('Все монеты собраны');
-  console.log(`Статус игры: ${level.status}`);
-}
-
-const obstacle = level.obstacleAt(new Vector(1, 1), player.size);
-if (obstacle) {
-  console.log(`На пути препятствие: ${obstacle}`);
-}
-
-const otherActor = level.actorAt(player);
-if (otherActor === fireball) {
-  console.log('Пользователь столкнулся с шаровой молнией');
-}
