@@ -131,7 +131,7 @@ class Level {
     for (let x = leftWall; x < rightWall; x++) {
       for (let y = topWall; y < lava; y++) {
         if (this.grid[y][x] === 'wall' || this.grid[y][x] === 'lava') {
-          return this.grid[y][x];
+          return this.grid[y][x]; //
         }
       }
     }
@@ -160,3 +160,53 @@ class Level {
   }
 }
 
+class LevelParser {
+  constructor (actorsDict) {
+    this.actorsDict = actorsDict;
+  }
+
+  actorFromSymbol(actorSymbol) {
+    if (actorSymbol) {
+      return this.actorsDict[actorSymbol];
+    }
+  }
+
+  obstacleFromSymbol(obstacleSymbol) {
+    if (obstacleSymbol === 'x') {
+      return 'wall';
+    } else if (obstacleSymbol === '!') {
+      return 'lava';
+    }
+  }
+
+  createGrid(stringArray) {
+    return stringArray.map(function(string) {
+      return string.split('').map(function(symb) {
+        if (symb === 'x') {
+          return 'wall';
+        } else if (symb === '!') {
+          return 'lava';
+        }
+        return undefined;
+      });
+    });
+
+  }
+}
+//Пример использования
+const plan = [
+  ' @ ',
+  'x!x'
+];
+
+const actorsDict = Object.create(null);
+actorsDict['@'] = Actor;
+      console.log(actorsDict);
+const parser = new LevelParser(actorsDict);
+const level = parser.parse(plan);
+
+level.grid.forEach((line, y) => {
+  line.forEach((cell, x) => console.log(`(${x}:${y}) ${cell}`));
+});
+
+level.actors.forEach(actor => console.log(`(${actor.pos.x}:${actor.pos.y}) ${actor.type}`));
