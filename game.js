@@ -193,9 +193,6 @@ class LevelParser {
   }
 
   createActors(stringArray = []) {
-    if (!this.actorsDict) {
-      return [];
-    }
     const actorsArray = [];
     if (this.actorsDict) {
     stringArray.forEach((string, y) => {
