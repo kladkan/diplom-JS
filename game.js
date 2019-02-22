@@ -179,7 +179,7 @@ class LevelParser {
     }
   }
 
-  createGrid(stringArray) {
+  createGrid(stringArray = []) {
     return stringArray.map(function(string) {
       return string.split('').map(function(symb) {
         if (symb === 'x') {
@@ -190,8 +190,29 @@ class LevelParser {
         return undefined;
       });
     });
-
   }
+
+  createActors(stringArray = []) {
+    if (!this.actorsDict) {
+      return [];
+    }
+    const actorsArray = [];
+    if (this.actorsDict) {
+    stringArray.forEach((string, y) => {
+      string.split('').forEach((symb, x) => {
+        if (this.actorsDict[symb] === Actor) {
+          actorsArray.push(new this.actorsDict[symb](new Vector(x, y)));
+        };
+      });
+    });
+    }
+    return actorsArray;
+  }
+
+  parse(plan) {
+    return new Level(this.createGrid(plan), this.createActors(plan));
+  }
+
 }
 //Пример использования
 const plan = [
@@ -201,8 +222,9 @@ const plan = [
 
 const actorsDict = Object.create(null);
 actorsDict['@'] = Actor;
-      console.log(actorsDict);
+      //console.log(actorsDict['@']);
 const parser = new LevelParser(actorsDict);
+      //console.log(parser.createActors(plan));
 const level = parser.parse(plan);
 
 level.grid.forEach((line, y) => {
