@@ -161,7 +161,7 @@ class Level {
 }
 
 class LevelParser {
-  constructor (actorsDict) {
+  constructor(actorsDict) {
     this.actorsDict = actorsDict;
   }
 
@@ -209,8 +209,24 @@ class LevelParser {
     });
     return actorsArray;
   }
-  
+
   parse(plan) {
     return new Level(this.createGrid(plan), this.createActors(plan));
   }
+}
+
+class Fireball extends Actor {
+  constructor(pos = new Vector(0, 0), speed = new Vector(0, 0)) {
+    super(pos, speed);
+    this.size = new Vector(1, 1)
+  }
+
+  get type() {
+    return 'fireball';
+  }
+
+  getNextPosition(time = 1) {
+    return new Vector(this.pos.x + this.speed.x * time, this.pos.y + this.speed.y * time);
+  }
+  
 }
