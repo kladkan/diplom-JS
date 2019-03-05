@@ -76,11 +76,15 @@ class Level {
   constructor(grid = [], actors = []) {
     this.grid = grid;
     this.actors = actors;
-    this.player = actors.find(player => player.type === 'player');
+    this._player = actors.find(player => player.type === 'player');
     this.height = grid.length;
     this.width = this.grid.reduce((x, y) => {return Math.max(y.length, x)}, 0);
     this.status = null;
     this.finishDelay = 1;
+  }
+
+  get player() {
+    return this._player;
   }
 
   isFinished() {
@@ -323,8 +327,8 @@ const schemas = [
     '        o',
     '        x',
     '@        ',
-    'x    o   ',
-    '    xx   '
+    'x  o o   ',
+    '   xxx   '
   ]
 ];
 const actorDict = {
